@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Pencil, Plus, Search, Trash2, X } from 'lucide-react';
+import { Pencil, Plus, ReceiptText, Search, Trash2, X } from 'lucide-react';
 import { sdk } from '@/services/sdk';
 import { useFetch } from '@/hooks/useFetch';
 import { formatLocalDate } from '@/utils/date';
