@@ -1,0 +1,18 @@
+{
+  "_meta": {
+    "amount_c": {"type":"Number","label":"Amount","required":true},
+    "type_c": {"type":"Picklist","label":"Type","required":true,"values":["Income","Expense"]},
+    "category_c": {"type":"Text","label":"Category","required":true},
+    "merchant_c": {"type":"Text","label":"Merchant","required":true},
+    "date_c": {"type":"Date","label":"Date","required":true},
+    "paymentMethod_c": {"type":"Picklist","label":"Payment Method","values":["UPI","Card","Cash","Bank Transfer","Other"]},
+    "note_c": {"type":"MultilineText","label":"Note"}
+  },
+  "records": [
+    {"Id":"2b5a9d4f-2d7c-4f8c-9d22-0c4c5d0f8a11","Name":"Rent","CreatedOn":"2026-09-01T05:00:00Z","CreatedBy":"a41c9d27-5e8f-4b06-9c3a-d7f218e64b90","ModifiedOn":"2026-09-01T05:00:00Z","ModifiedBy":"a41c9d27-5e8f-4b06-9c3a-d7f218e64b90","Owner":"a41c9d27-5e8f-4b06-9c3a-d7f218e64b90","amount_c":18000,"type_c":"Expense","category_c":"Housing","merchant_c":"Home Rent","date_c":"2026-09-01","paymentMethod_c":"Bank Transfer","note_c":"September rent"},
+    {"Id":"4a7fcb11-3a7d-4fd1-a6c0-6e3d11f5c0aa","Name":"Freelance","CreatedOn":"2026-09-03T08:30:00Z","CreatedBy":"a41c9d27-5e8f-4b06-9c3a-d7f218e64b90","ModifiedOn":"2026-09-03T08:30:00Z","ModifiedBy":"a41c9d27-5e8f-4b06-9c3a-d7f218e64b90","Owner":"a41c9d27-5e8f-4b06-9c3a-d7f218e64b90","amount_c":42000,"type_c":"Income","category_c":"Work","merchant_c":"Freelance Client","date_c":"2026-09-03","paymentMethod_c":"Bank Transfer","note_c":"Project milestone"},
+    {"Id":"8c5e1d93-88d2-4bd6-91d4-3e3b0f9b4f22","Name":"Groceries","CreatedOn":"2026-09-07T12:00:00Z","CreatedBy":"a41c9d27-5e8f-4b06-9c3a-d7f218e64b90","ModifiedOn":"2026-09-07T12:00:00Z","ModifiedBy":"a41c9d27-5e8f-4b06-9c3a-d7f218e64b90","Owner":"a41c9d27-5e8f-4b06-9c3a-d7f218e64b90","amount_c":4600,"type_c":"Expense","category_c":"Food","merchant_c":"Local Market","date_c":"2026-09-07","paymentMethod_c":"UPI","note_c":"Weekly groceries"},
+    {"Id":"1d0c8c2b-2f39-45fb-aac1-9f2d2c6e7a33","Name":"Metro & Cab","CreatedOn":"2026-09-10T07:00:00Z","CreatedBy":"a41c9d27-5e8f-4b06-9c3a-d7f218e64b90","ModifiedOn":"2026-09-10T07:00:00Z","ModifiedBy":"a41c9d27-5e8f-4b06-9c3a-d7f218e64b90","Owner":"a41c9d27-5e8f-4b06-9c3a-d7f218e64b90","amount_c":1800,"type_c":"Expense","category_c":"Transport","merchant_c":"Metro + Uber","date_c":"2026-09-10","paymentMethod_c":"UPI","note_c":"Commute"},
+    {"Id":"9b3f6d10-51a1-4e4b-b3f1-8b0e6b4b9c44","Name":"Coffee","CreatedOn":"2026-09-12T09:00:00Z","CreatedBy":"a41c9d27-5e8f-4b06-9c3a-d7f218e64b90","ModifiedOn":"2026-09-12T09:00:00Z","ModifiedBy":"a41c9d27-5e8f-4b06-9c3a-d7f218e64b90","Owner":"a41c9d27-5e8f-4b06-9c3a-d7f218e64b90","amount_c":260,"type_c":"Expense","category_c":"Food","merchant_c":"Campus Cafe","date_c":"2026-09-12","paymentMethod_c":"Card","note_c":"Morning coffee"}
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "_meta": {
+    "category_c":{"type":"Text","label":"Category","required":true},
+    "month_c":{"type":"Date","label":"Month","required":true},
+    "limit_c":{"type":"Number","label":"Monthly Limit","required":true}
+  },
+  "records": [
+    {"Id":"c1a7b8f0-4e32-49e8-8c21-2d9c4f5b7a11","Name":"Food","CreatedOn":"2026-09-01T05:00:00Z","CreatedBy":"a41c9d27-5e8f-4b06-9c3a-d7f218e64b90","ModifiedOn":"2026-09-01T05:00:00Z","ModifiedBy":"a41c9d27-5e8f-4b06-9c3a-d7f218e64b90","Owner":"a41c9d27-5e8f-4b06-9c3a-d7f218e64b90","category_c":"Food","month_c":"2026-09-01","limit_c":8000},
+    {"Id":"e2b8c9d1-5f43-4af9-9d32-3e0d5f6c8b22","Name":"Transport","CreatedOn":"2026-09-01T05:00:00Z","CreatedBy":"a41c9d27-5e8f-4b06-9c3a-d7f218e64b90","ModifiedOn":"2026-09-01T05:00:00Z","ModifiedBy":"a41c9d27-5e8f-4b06-9c3a-d7f218e64b90","Owner":"a41c9d27-5e8f-4b06-9c3a-d7f218e64b90","category_c":"Transport","month_c":"2026-09-01","limit_c":5000},
+    {"Id":"f3c9d0e2-6a54-4bf0-ae43-4f1e6a7d9c33","Name":"Housing","CreatedOn":"2026-09-01T05:00:00Z","CreatedBy":"a41c9d27-5e8f-4b06-9c3a-d7f218e64b90","ModifiedOn":"2026-09-01T05:00:00Z","ModifiedBy":"2026-09-01T05:00:00Z","Owner":"a41c9d27-5e8f-4b06-9c3a-d7f218e64b90","category_c":"Housing","month_c":"2026-09-01","limit_c":20000},
+    {"Id":"a4d0e1f3-7b65-4cf1-bf54-5f2f7b8e0d44","Name":"Personal","CreatedOn":"2026-09-01T05:00:00Z","CreatedBy":"a41c9d27-5e8f-4b06-9c3a-d7f218e64b90","ModifiedOn":"2026-09-01T05:00:00Z","ModifiedBy":"a41c9d27-5e8f-4b06-9c3a-d7f218e64b90","Owner":"a41c9d27-5e8f-4b06-9c3a-d7f218e64b90","category_c":"Personal","month_c":"2026-09-01","limit_c":6000}
+  ]
+}
