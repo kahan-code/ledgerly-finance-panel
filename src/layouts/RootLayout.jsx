@@ -1,8 +1,8 @@
 import { createContext, useContext, useEffect, useRef, useCallback } from 'react';
 import { Outlet, useLocation, useMatches, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { sdk } from '@/services/sdk';
 import { setUser, clearUser, setInitialized } from '@/store/userSlice';
+import { supabase } from '@/lib/supabase';
 import { verifyRouteAccess } from '@/router/route.utils';
 import { APP_CONFIG, AUTH_PROFILES, GENERIC_AUTH } from '@/config/app.config';
 import { Loader2 } from 'lucide-react';
@@ -34,12 +34,14 @@ export default function RootLayout() {
     hasInitRef.current = true;
 
     let isMounted = true;
+
     const init = async () => {
       try {
-        const currentUser = sdk.session.user();
+        const { data, error } = await supabase.auth.getSession();
         if (!isMounted) return;
-        if (currentUser) {
-          dispatch(setUser(currentUser));
+        if (error) throw error;
+        if (data.session?.user) {
+          dispatch(setUser(data.session.user));
           handlePostAuthNavigation();
         } else {
           dispatch(setInitialized());
@@ -48,18 +50,25 @@ export default function RootLayout() {
         if (isMounted) dispatch(setInitialized());
       }
     };
+
     init();
 
-    const unsub = sdk.session.subscribe((state) => {
-      if (state.status === 'authenticated' && state.user) {
-        dispatch(setUser(state.user));
-        handlePostAuthNavigation();
-      } else if (state.status === 'anonymous') {
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!isMounted) return;
+      if (session?.user) {
+        dispatch(setUser(session.user));
+        if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+          handlePostAuthNavigation();
+        }
+      } else if (event === 'SIGNED_OUT') {
         dispatch(clearUser());
       }
     });
 
-    return () => { isMounted = false; unsub(); };
+    return () => {
+      isMounted = false;
+      listener?.subscription?.unsubscribe();
+    };
   }, [dispatch]);
 
   function handlePostAuthNavigation() {
@@ -69,6 +78,7 @@ export default function RootLayout() {
       navigateRef.current(redirectPath, { replace: true });
       return;
     }
+
     const pathname = window.location.pathname;
     const authMatch = pathname.match(AUTH_PAGE_PATTERN);
     if (authMatch) {
@@ -96,7 +106,7 @@ export default function RootLayout() {
   }, [location.pathname, isInitialized, user, accessRule]);
 
   const handleLogout = useCallback(async () => {
-    await sdk.session.logout();
+    await supabase.auth.signOut();
     dispatch(clearUser());
     navigateRef.current(APP_CONFIG.defaultLoginRoute ?? '/login', { replace: true });
   }, [dispatch]);
