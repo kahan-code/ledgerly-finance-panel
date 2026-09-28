@@ -1,78 +1,54 @@
 import { useMemo } from 'react';
 import { useAuth } from '@/layouts/RootLayout';
-import { APP_CONFIG, AUTH_PROFILES, GENERIC_AUTH } from '@/config/app.config';
-import { useFetch } from '@/hooks/useFetch';
-import { sdk } from '@/services/sdk';
+import { APP_CONFIG, GENERIC_AUTH } from '@/config/app.config';
 
-// Auto-discover nav items and footer pages from page exports
 const pageMods = import.meta.glob('/src/pages/**/*.jsx', { eager: true });
 
 const discoveredNavItems = Object.entries(pageMods)
   .filter(([, mod]) => mod.nav)
+  .map(([, ,]) => null);
+
+const navItems = Object.entries(pageMods)
+  .filter(([, mod]) => mod.nav)
   .map(([, mod]) => ({ ...mod.nav, to: mod.nav.to ?? mod.route?.path }))
   .sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
 
-const navPaths = new Set(discoveredNavItems.map((n) => n.to));
 const footerPages = Object.entries(pageMods)
-  .filter(([, mod]) => mod.route && mod.route.layout === 'owner' && mod.route.access !== 'public' && !mod.route.path.includes(':') && !navPaths.has(mod.route.path))
+  .filter(([, mod]) => mod.route && mod.route.layout === 'owner' && mod.route.access !== 'public' && !mod.route.path.includes(':') && !navItems.some((n) => n.to === mod.route.path))
   .map(([, mod]) => mod.route);
 
-const countItems = discoveredNavItems.filter((item) => item.count?.table);
-
-async function fetchCounts() {
-  if (!countItems.length) return {};
-  const results = await Promise.all(countItems.map((item) =>
-    sdk.table(item.count.table)
-      .select([{ field: 'Id' }])
-      .aggregate([{ id: 'c', fields: [{ field: 'Id', fn: 'Count', alias: 'count' }], ...(item.count.where ? { where: item.count.where } : {}) }])
-      .limit(1)
-      .fetch()
-  ));
-  const counts = {};
-  countItems.forEach((item, i) => {
-    const bucket = results[i]?.aggregators?.find((a) => a.id === 'c');
-    counts[item.to] = bucket?.data?.count ?? bucket?.count ?? bucket?.value ?? 0;
-  });
-  return counts;
-}
-
-// The single data source for OwnerLayout: auth, nav discovery, profile filtering,
-// section grouping, footer pages, nav count badges, and the post-login home route.
 export function useOwnerLayoutData() {
   const { logout, user } = useAuth();
 
-  // "Home" for a signed-in user is their profile's post-login route, matching AuthPage.
-  const homeRoute = useMemo(() => {
-    const matched = AUTH_PROFILES?.find((p) => p.name === user?.profile);
-    return matched?.redirectAfterAuth ?? GENERIC_AUTH?.redirectAfterAuth ?? '/';
-  }, [user?.profile]);
+  const homeRoute = GENERIC_AUTH?.redirectAfterAuth ?? '/dashboard';
 
-  const navItems = useMemo(
-    () => discoveredNavItems.filter((item) => !item.profiles || item.profiles.includes(user?.profile)),
-    [user?.profile]
-  );
+  const visibleNav = useMemo(() => navItems.filter((item) => !item.profiles), []);
 
   const navGroups = useMemo(() => {
     const groups = [];
     const byLabel = new Map();
-    for (const item of navItems) {
-      const groupLabel = item.section ?? null;
-      let group = groupLabel != null ? byLabel.get(groupLabel) : null;
+    for (const item of visibleNav) {
+      const label = item.section ?? null;
+      let group = label ? byLabel.get(label) : null;
       if (!group) {
-        group = { label: groupLabel, items: [] };
+        group = { label, items: [] };
         groups.push(group);
-        if (groupLabel != null) byLabel.set(groupLabel, group);
+        if (label) byLabel.set(label, group);
       }
       group.items.push(item);
     }
     return groups;
-  }, [navItems]);
+  }, [visibleNav]);
 
-  const initials = `${user?.firstName?.[0] ?? ''}${user?.lastName?.[0] ?? ''}`.toUpperCase()
-    || APP_CONFIG.name.slice(0, 2).toUpperCase();
-  const displayName = [user?.firstName, user?.lastName].filter(Boolean).join(' ') || user?.emailAddress;
+  const email = user?.email ?? user?.emailAddress ?? '';
+  const metadata = user?.user_metadata ?? {};
+  const firstName = metadata.first_name ?? metadata.firstName ?? '';
+  const lastName = metadata.last_name ?? metadata.lastName ?? '';
+  const initials = (firstName[0] && lastName[0]
+    ? firstName[0] + lastName[0]
+    : email.slice(0, 2)
+  ).toUpperCase() || APP_CONFIG.name.slice(0, 2).toUpperCase();
+  const displayName = [firstName, lastName].filter(Boolean).join(' ') || email || 'Account';
 
-  const { data: counts, run: refreshCounts } = useFetch(fetchCounts, []);
-
-  return { user, logout, homeRoute, navItems, navGroups, footerPages, initials, displayName, counts: counts ?? {}, refreshCounts };
+  return { user, logout, homeRoute, navItems: visibleNav, navGroups, footerPages, initials, displayName, counts: {}, refreshCounts: () => {} };
 }
