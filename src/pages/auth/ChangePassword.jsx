@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { sdk } from '@/services/sdk';
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/layouts/RootLayout';
 import ApperIcon from '@/components/ApperIcon';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import ProviderAuthPage from './ProviderAuthPage';
 import AuthLayout from './AuthLayout';
 
 export const route = {
@@ -14,17 +14,6 @@ export const route = {
 };
 
 export default function ChangePassword() {
-  const hasUI = Boolean(sdk.session.ui);
-
-  if (hasUI) {
-    return (
-      <ProviderAuthPage
-        targetId="change-password-target"
-        mount={(t) => sdk.session.ui.showChangePassword(t)}
-      />
-    );
-  }
-
   return <HeadlessChangePassword />;
 }
 
@@ -38,6 +27,7 @@ function HeadlessChangePassword() {
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState(null);
+  const { user } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -45,12 +35,12 @@ function HeadlessChangePassword() {
     if (newPassword !== confirmPassword) { setError('Passwords do not match'); return; }
     setLoading(true);
     try {
-      const result = await sdk.session.changePassword({ currentPassword, newPassword, confirmPassword });
-      if (result.ok) {
-        setDone(true);
-      } else {
-        setError(result.error?.message || 'Failed to change password');
-      }
+      if (!user?.email) throw new Error('No authenticated account found.');
+      const { error: reauthError } = await supabase.auth.signInWithPassword({ email: user.email, password: currentPassword });
+      if (reauthError) throw new Error('Current password is incorrect.');
+      const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
+      if (updateError) throw updateError;
+      setDone(true);
     } catch (err) {
       setError(err?.message || 'Unexpected error');
     } finally {
