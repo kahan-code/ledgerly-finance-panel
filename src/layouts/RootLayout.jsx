@@ -106,9 +106,15 @@ export default function RootLayout() {
   }, [location.pathname, isInitialized, user, accessRule]);
 
   const handleLogout = useCallback(async () => {
-    await supabase.auth.signOut();
-    dispatch(clearUser());
-    navigateRef.current(APP_CONFIG.defaultLoginRoute ?? '/login', { replace: true });
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+    } catch (error) {
+      console.error('Supabase sign-out failed:', error);
+    } finally {
+      dispatch(clearUser());
+      navigateRef.current(APP_CONFIG.defaultLoginRoute ?? '/login', { replace: true });
+    }
   }, [dispatch]);
 
   if (!isInitialized) {

@@ -50,7 +50,7 @@ export default function Dashboard() {
     <div className="space-y-8">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div><p className="text-sm font-semibold text-success">Live account</p><h1 className="mt-1 font-heading text-4xl sm:text-5xl">Your money, at a glance.</h1><p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Your figures come directly from your private Supabase account.</p></div>
-        <Button onClick={() => window.dispatchEvent(new CustomEvent('ledgerly:new-transaction'))}><Plus size={17}/> Add transaction</Button>
+        <Button asChild><Link to="/transactions?add=1"><Plus size={17}/> Add transaction</Link></Button>
       </header>
 
       {error && <div className="rounded-2xl border border-destructive/30 bg-card p-5"><p className="font-semibold text-destructive">We couldn't refresh your money data.</p><p className="mt-1 text-sm text-muted-foreground">{error}</p><Button variant="outline" size="sm" onClick={load} className="mt-3">Try again</Button></div>}

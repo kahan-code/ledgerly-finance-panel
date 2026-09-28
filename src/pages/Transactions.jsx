@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Pencil, Plus, ReceiptText, Search, Trash2, X } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { formatLocalDate } from '@/utils/date';
@@ -10,9 +11,10 @@ export const route={path:'/transactions',layout:'owner',access:'authenticated'};
 export const nav={label:'Transactions',to:'/transactions',icon:'ReceiptText',section:'Workspace',order:2};
 
 export default function Transactions(){
+ const location = useLocation();
  const [data,setData]=useState([]),[loading,setLoading]=useState(true),[error,setError]=useState(''),[query,setQuery]=useState(''),[type,setType]=useState('All'),[sort,setSort]=useState('date'),[editing,setEditing]=useState(null),[saving,setSaving]=useState(false),[deleting,setDeleting]=useState(null),[form,setForm]=useState(EMPTY());
  async function run(){setLoading(true);setError('');const {data:rows,error:e}=await supabase.from('transactions').select('*').order('date',{ascending:false}).limit(100);if(e)setError(e.message);else setData(rows??[]);setLoading(false);}
- useEffect(()=>{run();const open=()=>{setEditing('new');setForm(EMPTY())};window.addEventListener('ledgerly:new-transaction',open);return()=>window.removeEventListener('ledgerly:new-transaction',open)},[]);
+ useEffect(()=>{run();const open=()=>{setEditing('new');setForm(EMPTY())};window.addEventListener('ledgerly:new-transaction',open);if(new URLSearchParams(location.search).get('add')==='1')open();return()=>window.removeEventListener('ledgerly:new-transaction',open)},[location.search]);
  const rows=useMemo(()=>[...data].filter(r=>type==='All'||r.type===type).filter(r=>[r.merchant,r.category,r.name,r.note].join(' ').toLowerCase().includes(query.toLowerCase())).sort((a,b)=>sort==='amount'?Number(b.amount)-Number(a.amount):String(b.date).localeCompare(String(a.date))),[data,type,query,sort]);
  const set=(k,v)=>setForm(x=>({...x,[k]:v}));
  async function save(e){e.preventDefault();if(!form.merchant.trim()||!form.amount||!form.date)return;setSaving(true);try{const {data:{user},error:userError}=await supabase.auth.getUser();if(userError||!user)throw userError||new Error('Your session has expired. Please sign in again.');const payload={...form,user_id:user.id,name:form.name.trim()||form.merchant.trim(),amount:Number(form.amount)};const result=editing==='new'?await supabase.from('transactions').insert(payload):await supabase.from('transactions').update(payload).eq('id',editing);if(result.error)throw result.error;setEditing(null);setForm(EMPTY());await run()}catch(e){setError(e.message||'Could not save transaction.')}finally{setSaving(false)}}
