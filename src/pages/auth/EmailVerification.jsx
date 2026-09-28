@@ -9,7 +9,6 @@ import AuthLayout from './AuthLayout';
 
 export default function EmailVerification() {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
