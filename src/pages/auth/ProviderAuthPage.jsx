@@ -1,10 +1,8 @@
 import { useEffect } from 'react';
-import { sdk } from '@/services/sdk';
 
 export default function ProviderAuthPage({ title, description, targetId, mount }) {
   useEffect(() => {
-    mount(`#${targetId}`);
-    return () => { if (document.querySelector(`#${targetId}`)) sdk.session.ui?.showBlank?.(`#${targetId}`); };
+    mount?.(`#${targetId}`);
   }, [targetId, mount]);
 
   return (
