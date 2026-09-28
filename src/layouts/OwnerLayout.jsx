@@ -1,11 +1,13 @@
 import { NavLink, Outlet } from 'react-router-dom';
-import { LogOut, Plus, WalletCards } from 'lucide-react';
+import { LogOut, Menu, Plus, WalletCards, X } from 'lucide-react';
 import ThemeToggle from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
+import { useState } from 'react';
 import { useOwnerLayoutData } from '@/hooks/useOwnerLayoutData';
 
 export default function OwnerLayout() {
   const { user, logout, navGroups, homeRoute, initials, displayName } = useOwnerLayoutData();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <div className="min-h-svh bg-background text-foreground lg:grid lg:grid-cols-[248px_1fr]">
@@ -73,8 +75,46 @@ export default function OwnerLayout() {
             <Button size="icon" onClick={() => window.dispatchEvent(new CustomEvent('ledgerly:new-transaction'))} aria-label="Add transaction">
               <Plus size={18} />
             </Button>
+            <Button variant="outline" size="icon" onClick={() => setMenuOpen(true)} aria-label="Open navigation">
+              <Menu size={18} />
+            </Button>
           </div>
         </div>
+        {menuOpen && (
+          <div className="lg:hidden fixed inset-0 z-50">
+            <button aria-label="Close navigation" className="absolute inset-0 bg-black/40" onClick={() => setMenuOpen(false)} />
+            <aside className="absolute right-0 top-0 h-full w-[min(86vw,340px)] border-l border-border bg-background p-5 shadow-xl">
+              <div className="flex items-center justify-between">
+                <span className="font-heading text-2xl">Ledgerly</span>
+                <Button variant="ghost" size="icon" onClick={() => setMenuOpen(false)} aria-label="Close navigation"><X size={19}/></Button>
+              </div>
+              <nav className="mt-7 space-y-6" aria-label="Mobile navigation">
+                {navGroups.map((group, index) => (
+                  <div key={group.label ?? index}>
+                    {group.label && <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">{group.label}</p>}
+                    <div className="space-y-1">
+                      {group.items.map((item) => (
+                        <NavLink key={item.to} to={item.to} onClick={() => setMenuOpen(false)} className={({ isActive }) => [
+                          'flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold',
+                          isActive ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+                        ].join(' ')}>
+                          {item.label}
+                        </NavLink>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </nav>
+              <div className="absolute inset-x-5 bottom-5 border-t border-border pt-4">
+                <div className="mb-4 flex items-center gap-3">
+                  <div className="grid size-9 place-items-center rounded-full bg-muted text-sm font-bold">{initials}</div>
+                  <div className="min-w-0"><p className="truncate text-sm font-semibold">{displayName}</p><p className="truncate text-xs text-muted-foreground">{user?.email ?? ''}</p></div>
+                </div>
+                <Button variant="outline" className="w-full justify-start gap-2" onClick={logout}><LogOut size={16}/> Sign out</Button>
+              </div>
+            </aside>
+          </div>
+        )}
         <div className="mx-auto max-w-[1500px] px-4 py-5 sm:px-6 lg:px-10 lg:py-8">
           <Outlet />
         </div>
