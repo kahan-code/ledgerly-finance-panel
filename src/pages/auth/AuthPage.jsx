@@ -35,7 +35,6 @@ export default function AuthPage({ mode }) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
   const [message, setMessage] = useState(null);
   const [error, setError] = useState(null);
 
@@ -82,44 +81,9 @@ export default function AuthPage({ mode }) {
     }
   };
 
-  const handleGoogle = async () => {
-    setError(null);
-    setMessage(null);
-    setGoogleLoading(true);
-    try {
-      const { error: authError } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: window.location.origin + '/callback',
-        },
-      });
-      if (authError) throw authError;
-    } catch (err) {
-      setError(err?.message || 'Google sign-in failed');
-      setGoogleLoading(false);
-    }
-  };
-
   return (
     <AuthLayout title={title} description={description}>
       <div className="flex flex-col gap-3">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={handleGoogle}
-          disabled={loading || googleLoading}
-          className="w-full h-10"
-        >
-          <span className="mr-2 text-base font-semibold">G</span>
-          {googleLoading ? 'Connecting to Google…' : 'Continue with Google'}
-        </Button>
-
-        <div className="flex items-center gap-3 py-1">
-          <div className="h-px flex-1 bg-border/60" />
-          <span className="text-xs text-muted-foreground">or continue with email</span>
-          <div className="h-px flex-1 bg-border/60" />
-        </div>
-
         <form onSubmit={handleEmailAuth} className="flex flex-col gap-3">
           <div className="space-y-1">
             <Label htmlFor="email">Email</Label>
@@ -192,7 +156,7 @@ export default function AuthPage({ mode }) {
           {message && <p className="text-sm text-primary">{message}</p>}
 
           <div className="pt-2">
-            <Button type="submit" disabled={loading || googleLoading} className="w-full h-9">
+            <Button type="submit" disabled={loading} className="w-full h-9">
               {loading ? 'Please wait…' : mode === 'login' ? 'Sign in' : 'Create account'}
             </Button>
           </div>
