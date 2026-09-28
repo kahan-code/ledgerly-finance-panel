@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { sdk } from '@/services/sdk';
-import { setUser } from '@/store/userSlice';
+import { supabase } from '@/lib/supabase';
 import { GENERIC_AUTH } from '@/config/app.config';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -12,6 +10,7 @@ import AuthLayout from './AuthLayout';
 export default function EmailVerification() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -22,14 +21,9 @@ export default function EmailVerification() {
     setError(null);
     setLoading(true);
     try {
-      const result = await sdk.session.verifyEmail({ code });
-      if (result.ok) {
-        const user = await sdk.session.getUser();
-        if (user) dispatch(setUser(user));
-        navigate(GENERIC_AUTH.redirectAfterAuth);
-      } else {
-        setError(result.error?.message || 'Verification failed');
-      }
+      const { data, error: verifyError } = await supabase.auth.verifyOtp({ email: email.trim(), token: code.trim(), type: 'email' });
+      if (verifyError) throw verifyError;
+      if (data.user) navigate(GENERIC_AUTH.redirectAfterAuth, { replace: true });
     } catch (err) {
       setError(err?.message || 'Unexpected error');
     } finally {
@@ -39,11 +33,13 @@ export default function EmailVerification() {
 
   const handleResend = async () => {
     setResent(false);
-    const user = sdk.session.user();
-    const email = user?.emailAddress || user?.email;
-    if (!email) return;
-    await sdk.session.resendVerificationCode({ emailAddress: email });
-    setResent(true);
+    if (!email.trim()) {
+      setError('Enter your email address first.');
+      return;
+    }
+    const { error: resendError } = await supabase.auth.resend({ type: 'signup', email: email.trim() });
+    if (resendError) setError(resendError.message);
+    else setResent(true);
   };
 
   return (
@@ -54,6 +50,8 @@ export default function EmailVerification() {
     >
       <form onSubmit={handleVerify} className="flex flex-col gap-3">
         <div className="space-y-1">
+          <Label htmlFor="email">Email</Label>
+          <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required className="h-9" />
           <Label htmlFor="code">Verification code</Label>
           <Input
             id="code"
