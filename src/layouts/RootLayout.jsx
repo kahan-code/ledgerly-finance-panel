@@ -86,6 +86,11 @@ export default function RootLayout() {
       const matched = profileKey && AUTH_PROFILES?.find(p => p.key === profileKey);
       const target = matched?.redirectAfterAuth ?? GENERIC_AUTH?.redirectAfterAuth ?? '/';
       navigateRef.current(target, { replace: true });
+      return;
+    }
+
+    if (pathname === '/') {
+      navigateRef.current('/dashboard', { replace: true });
     }
   }
 
